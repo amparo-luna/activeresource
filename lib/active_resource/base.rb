@@ -293,6 +293,7 @@ module ActiveResource
     class_attribute :_collection_parser
     class_attribute :include_format_in_path
     self.include_format_in_path = true
+    
 
     class << self
       # Creates a schema for this resource - setting the attributes that are
@@ -1031,6 +1032,21 @@ module ActiveResource
     def schema
       self.class.schema || self.attributes
     end
+  
+    def site
+      @site || self.class.site
+    end
+    
+    def site=(site)
+      @connection = nil
+      if site.nil?
+        @site = nil
+      else
+        @site = site.is_a?(URI) ? site : URI.parse(site)
+        @user = URI.parser.unescape(@site.user) if @site.user
+        @password = URI.parser.unescape(@site.password) if @site.password
+      end
+    end
 
     # This is a list of known attributes for this resource. Either
     # gathered from the provided <tt>schema</tt>, or from the attributes
@@ -1401,7 +1417,16 @@ module ActiveResource
 
     protected
       def connection(refresh = false)
-        self.class.connection(refresh)
+        @connection ||= begin
+          @connection = Connection.new(site, self.class.format) if refresh || @connection.nil?
+          @connection.proxy = self.class.proxy if self.class.proxy
+          @connection.user = self.class.user if self.class.user
+          @connection.password = self.class.password if self.class.password
+          @connection.auth_type = self.class.auth_type if self.class.auth_type
+          @connection.timeout = self.class.timeout if self.class.timeout
+          @connection.ssl_options = self.class.ssl_options if self.class.ssl_options
+          @connection
+        end
       end
 
       # Update the resource on the remote service.

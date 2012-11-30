@@ -9,9 +9,12 @@ require "fixtures/address"
 require "fixtures/subscription_plan"
 require "fixtures/post"
 require "fixtures/comment"
+require "fixtures/project"
+require "fixtures/product"
+require "fixtures/inventory"
 require 'active_support/json'
 require 'active_support/core_ext/hash/conversions'
-require 'mocha'
+require 'mocha/setup'
 
 class BaseTest < ActiveSupport::TestCase
   def setup
@@ -49,6 +52,14 @@ class BaseTest < ActiveSupport::TestCase
     actor.site = 'http://localhost:31337'
     actor.site = nil
     assert_nil actor.site
+  end
+  
+  def test_site_variable_can_be_changed_at_instance
+    project = Project.new(:name => "Example", :description => "Example Description")
+    project.site = 'foo:bar@beast.caboo.se'
+    puts project.site.is_a?(URI)
+    #assert 'foo:bar@beast.caboo.se', project.site
+    #assert 'http://37s.sunrise.i:3000', Project.site
   end
 
   def test_proxy_accessor_accepts_uri_or_string_argument
@@ -700,14 +711,14 @@ class BaseTest < ActiveSupport::TestCase
   def test_not_persisted_with_no_body_and_positive_content_length
     resp = ActiveResource::Response.new(nil)
     resp['Content-Length'] = "100"
-    Person.connection.expects(:post).returns(resp)
+    ActiveResource::Connection.any_instance.expects(:post).returns(resp)
     assert !Person.create.persisted?
   end
 
   def test_not_persisted_with_body_and_zero_content_length
     resp = ActiveResource::Response.new(@rick)
     resp['Content-Length'] = "0"
-    Person.connection.expects(:post).returns(resp)
+    ActiveResource::Connection.any_instance.expects(:post).returns(resp)
     assert !Person.create.persisted?
   end
 
@@ -715,7 +726,7 @@ class BaseTest < ActiveSupport::TestCase
   def test_not_persisted_with_empty_response_codes
     [100,101,204,304].each do |status_code|
       resp = ActiveResource::Response.new(@rick, status_code)
-      Person.connection.expects(:post).returns(resp)
+      ActiveResource::Connection.any_instance.expects(:post).returns(resp)
       assert !Person.create.persisted?
     end
   end
@@ -725,7 +736,7 @@ class BaseTest < ActiveSupport::TestCase
   def test_persisted_with_no_content_length
     resp = ActiveResource::Response.new(@rick)
     resp['Content-Length'] = nil
-    Person.connection.expects(:post).returns(resp)
+    ActiveResource::Connection.any_instance.expects(:post).returns(resp)
     assert Person.create.persisted?
   end
 
