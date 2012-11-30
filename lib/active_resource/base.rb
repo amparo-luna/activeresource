@@ -293,7 +293,6 @@ module ActiveResource
     class_attribute :_collection_parser
     class_attribute :include_format_in_path
     self.include_format_in_path = true
-    
 
     class << self
       # Creates a schema for this resource - setting the attributes that are

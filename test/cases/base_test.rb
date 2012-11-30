@@ -57,9 +57,9 @@ class BaseTest < ActiveSupport::TestCase
   def test_site_variable_can_be_changed_at_instance
     project = Project.new(:name => "Example", :description => "Example Description")
     project.site = 'foo:bar@beast.caboo.se'
-    puts project.site.is_a?(URI)
-    #assert 'foo:bar@beast.caboo.se', project.site
-    #assert 'http://37s.sunrise.i:3000', Project.site
+    
+    assert 'foo:bar@beast.caboo.se', project.site
+    assert 'http://37s.sunrise.i:3000', Project.site
   end
 
   def test_proxy_accessor_accepts_uri_or_string_argument
