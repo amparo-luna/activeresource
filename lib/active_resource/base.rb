@@ -1046,6 +1046,15 @@ module ActiveResource
         @password = URI.parser.unescape(@site.password) if @site.password
       end
     end
+    
+    # Changes the host of the instance site to contain the specified subdomain
+    def subdomain=(subdomain)
+      @connection = nil
+      if !subdomain.nil? && @site
+        @site.host = "#{subdomain}." + @site.host
+        @subdomain = subdomain
+      end
+    end
 
     # This is a list of known attributes for this resource. Either
     # gathered from the provided <tt>schema</tt>, or from the attributes
@@ -1070,6 +1079,8 @@ module ActiveResource
       @attributes     = {}.with_indifferent_access
       @prefix_options = {}
       @persisted = persisted
+      @subdomain = nil
+      @site = site
       load(attributes, false, persisted)
     end
 
@@ -1325,7 +1336,7 @@ module ActiveResource
     def load(attributes, remove_root = false, persisted = false)
       raise ArgumentError, "expected an attributes Hash, got #{attributes.inspect}" unless attributes.is_a?(Hash)
       @prefix_options, attributes = split_options(attributes)
-
+      
       if attributes.keys.size == 1
         remove_root = self.class.element_name == attributes.keys.first.to_s
       end

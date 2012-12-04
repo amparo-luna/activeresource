@@ -61,6 +61,14 @@ class BaseTest < ActiveSupport::TestCase
     assert 'foo:bar@beast.caboo.se', project.site
     assert 'http://37s.sunrise.i:3000', Project.site
   end
+  
+  def test_site_host_can_have_subdomain
+    project = Project.new(:name => "Example", :description => "Example Description")
+    project.site = 'http://user:password@beast.caboo.se'
+    project.subdomain = 'dentio'
+    
+    assert_equal 'http://user:password@dentio.beast.caboo.se', project.site.to_s
+  end
 
   def test_proxy_accessor_accepts_uri_or_string_argument
     proxy = URI.parse('http://localhost')
